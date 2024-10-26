@@ -586,7 +586,9 @@ const SprinklerDashboard = () => {
       <section className="scheduling">
         <div className="section-header">
           <h2><FaStopwatch /> Scheduling & Automation</h2>
-          <button onClick={() => setIsConfigureOpen(true)}>Configure</button>
+          {!isAutoMode && (
+            <button onClick={() => setIsConfigureOpen(true)}>Configure</button>
+          )}
         </div>
         <div className="schedule-content">
           <div className="active-schedule">
