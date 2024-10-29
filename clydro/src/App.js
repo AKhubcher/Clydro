@@ -1,107 +1,82 @@
 import React, { useState, useEffect } from 'react';
 import { 
   FaCloud, FaTint, FaSun, FaWind, 
-  FaThermometerHalf, FaUmbrella, FaTachometerAlt, FaStopwatch, FaCog, FaEye, FaCloudSun, FaMoon
+  FaThermometerHalf, FaUmbrella, FaMoon,
+  FaBolt, FaSnowflake, FaSmog, FaCloudSun,
+  FaCog, FaStopwatch
 } from 'react-icons/fa';
-import './App.css';
+import './styles/index.css';
+import { fetchWeatherData, fetchMoistureData } from './services/weatherService';
 
-const WeatherDetail = ({ icon: Icon, label, value, unit }) => (
+const getWeatherIcon = (iconName) => {
+  const icons = {
+    'sun': FaSun,
+    'cloud': FaCloud,
+    'cloud-sun': FaCloudSun,
+    'cloud-rain': FaTint,
+    'cloud-showers-heavy': FaTint,
+    'bolt': FaBolt,
+    'snowflake': FaSnowflake,
+    'smog': FaSmog,
+    'cloud-meatball': FaBolt,
+    'question': FaCloudSun
+  };
+  return icons[iconName] || icons['question'];
+};
+
+const WeatherDetail = ({ icon: IconComponent, label, value, unit, trend }) => (
   <div className="weather-detail">
-    <Icon className="weather-icon" />
+    <IconComponent className="weather-icon" />
     <div>
       <div className="weather-label">{label}</div>
       <div className="weather-value">
         {value}{unit}
+        {trend && <span className={`trend ${trend > 0 ? 'up' : 'down'}`}>
+          {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}
+        </span>}
       </div>
     </div>
   </div>
 );
 
-const WeeklyForecast = () => {
-  const forecast = [
-    { 
-      day: 'Today', 
-      temp: 75, 
-      condition: 'Sunny', 
-      icon: <FaSun className="forecast-icon" />, 
-      precipitation: 0,
-      humidity: 45,
-      windSpeed: 8,
-      uvIndex: 6 
-    },
-    { 
-      day: 'Tue', 
-      temp: 72, 
-      condition: 'Partly Cloudy', 
-      icon: <FaCloudSun className="forecast-icon" />, 
-      precipitation: 10,
-      humidity: 50,
-      windSpeed: 10,
-      uvIndex: 5 
-    },
-    { 
-      day: 'Wed', 
-      temp: 68, 
-      condition: 'Cloudy', 
-      icon: <FaCloud className="forecast-icon" />, 
-      precipitation: 30,
-      humidity: 60,
-      windSpeed: 12,
-      uvIndex: 4 
-    },
-    { 
-      day: 'Thu', 
-      temp: 70, 
-      condition: 'Sunny', 
-      icon: <FaSun className="forecast-icon" />, 
-      precipitation: 5,
-      humidity: 45,
-      windSpeed: 8,
-      uvIndex: 7 
-    },
-    { 
-      day: 'Fri', 
-      temp: 73, 
-      condition: 'Partly Cloudy', 
-      icon: <FaCloudSun className="forecast-icon" />, 
-      precipitation: 15,
-      humidity: 55,
-      windSpeed: 9,
-      uvIndex: 6 
-    },
-    { 
-      day: 'Sat', 
-      temp: 76, 
-      condition: 'Sunny', 
-      icon: <FaSun className="forecast-icon" />, 
-      precipitation: 0,
-      humidity: 40,
-      windSpeed: 7,
-      uvIndex: 8 
-    },
-    { 
-      day: 'Sun', 
-      temp: 74, 
-      condition: 'Partly Cloudy', 
-      icon: <FaCloudSun className="forecast-icon" />, 
-      precipitation: 20,
-      humidity: 50,
-      windSpeed: 11,
-      uvIndex: 5 
-    },
-  ];
+const WeeklyForecast = ({ forecast }) => {
+  const getDayName = (timestamp) => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  };
+
+  // Create a fixed order of days starting with Monday
+  const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  // Sort and filter forecast to ensure one entry per day
+  const uniqueForecast = dayOrder.map(targetDay => {
+    return forecast.find(day => getDayName(day.date) === targetDay);
+  }).filter(Boolean); // Remove any undefined entries
 
   return (
     <div className="weekly-forecast">
-      {forecast.map((day, index) => (
+      {uniqueForecast.map((day, index) => (
         <div key={index} className="forecast-day">
-          <div className="forecast-day-name">{day.day}</div>
-          <div className="forecast-icon-wrapper">{day.icon}</div>
-          <div className="forecast-temp">{day.temp}°F</div>
+          <div className="forecast-day-name">{getDayName(day.date)}</div>
+          <div className="forecast-icon-wrapper">
+            {React.createElement(getWeatherIcon(day.condition.icon))}
+          </div>
+          <div className="forecast-temp">
+            <span className="temp-max">{Math.round(day.maxTemp)}°</span>
+            <span className="temp-min">{Math.round(day.minTemp)}°</span>
+          </div>
           <div className="forecast-details">
-            <div>{day.precipitation}%</div>
-            <div>{day.windSpeed} mph</div>
-            <div>UV: {day.uvIndex}</div>
+            <div className="forecast-rain">
+              <FaUmbrella className="forecast-detail-icon" />
+              {Math.round(day.precipitationChance)}%
+            </div>
+            <div className="forecast-wind">
+              <FaWind className="forecast-detail-icon" />
+              {Math.round(day.windSpeed)} mph
+            </div>
+          </div>
+          <div className="forecast-condition">
+            {day.condition.description}
           </div>
         </div>
       ))}
@@ -189,67 +164,13 @@ const AutomationRules = ({ rules, setRules }) => {
   );
 };
 
-const ScheduleItem = ({ item, updateItem, removeItem }) => (
-  <div className="schedule-item">
-    <div className="schedule-description">
-      On <select
-        value={item.day}
-        onChange={(e) => updateItem('day', e.target.value)}
-      >
-        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-          <option key={day} value={day}>{day}</option>
-        ))}
-      </select>
-      at <input
-        type="time"
-        value={item.time}
-        onChange={(e) => updateItem('time', e.target.value)}
-      />
-      have the sprinkler go off for <input
-        type="number"
-        value={item.duration}
-        onChange={(e) => updateItem('duration', parseInt(e.target.value))}
-      /> minutes.
-    </div>
-    <div className="weather-adjustment">
-      Adjust for weather? <input
-        type="checkbox"
-        checked={item.adjustForWeather}
-        onChange={(e) => updateItem('adjustForWeather', e.target.checked)}
-      />
-      {item.adjustForWeather && (
-        <>
-          <div>
-            Minimum soil moisture: <input
-              type="number"
-              value={item.minMoisture}
-              onChange={(e) => updateItem('minMoisture', parseInt(e.target.value))}
-            />%
-          </div>
-          <div>
-            Skip if rain chance above: <input
-              type="number"
-              value={item.rainThreshold}
-              onChange={(e) => updateItem('rainThreshold', parseInt(e.target.value))}
-            />%
-          </div>
-        </>
-      )}
-    </div>
-    <button className="remove-schedule" onClick={removeItem}>Remove Schedule</button>
-  </div>
-);
-
 const ScheduleEditor = ({ schedule, setSchedule }) => {
   const addScheduleItem = () => {
     setSchedule([...schedule, {
       day: 'Monday',
       time: '06:00',
       duration: 30,
-      adjustForWeather: true,
-      minMoisture: 30,
-      maxWind: 15,
-      rainThreshold: 40
+      adjustForWeather: true
     }]);
   };
 
@@ -266,15 +187,237 @@ const ScheduleEditor = ({ schedule, setSchedule }) => {
   return (
     <div className="schedule-editor">
       {schedule.map((item, index) => (
-        <ScheduleItem
-          key={index}
-          item={item}
-          updateItem={(field, value) => updateScheduleItem(index, field, value)}
-          removeItem={() => removeScheduleItem(index)}
-        />
+        <div key={index} className="schedule-item-editor">
+          <div className="schedule-field">
+            <label>Day</label>
+            <select
+              value={item.day}
+              onChange={(e) => updateScheduleItem(index, 'day', e.target.value)}
+            >
+              {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+                <option key={day} value={day}>{day}</option>
+              ))}
+            </select>
+            <div className="schedule-controls">
+              <label className="weather-adjust-toggle">
+                <input
+                  type="checkbox"
+                  checked={item.adjustForWeather}
+                  onChange={(e) => updateScheduleItem(index, 'adjustForWeather', e.target.checked)}
+                />
+                Adjust for weather
+              </label>
+              <button 
+                className="remove-rule"
+                onClick={() => removeScheduleItem(index)}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+          
+          <div className="schedule-field">
+            <label>Time</label>
+            <input
+              type="time"
+              value={item.time}
+              onChange={(e) => updateScheduleItem(index, 'time', e.target.value)}
+            />
+          </div>
+          
+          <div className="schedule-field">
+            <label>Duration (minutes)</label>
+            <input
+              type="number"
+              min="1"
+              max="120"
+              value={item.duration}
+              onChange={(e) => updateScheduleItem(index, 'duration', parseInt(e.target.value))}
+            />
+          </div>
+        </div>
       ))}
-      <button onClick={addScheduleItem}>Add Schedule</button>
+      <button className="add-rule" onClick={addScheduleItem}>
+        + Add Schedule
+      </button>
     </div>
+  );
+};
+
+const SoilMoistureSection = ({ soilMoisture, moistureHistory, isDarkMode }) => {
+  // Generate sample data if no history exists
+  const sampleData = Array.from({ length: 24 }, (_, i) => ({
+    timestamp: Date.now() - (23 - i) * 3600000,
+    value: 45 + Math.sin(i / 4) * 15 + (Math.random() - 0.5) * 5
+  }));
+
+  const data = moistureHistory.length > 0 ? moistureHistory : sampleData;
+
+  const stats = {
+    average: Math.round(data.reduce((acc, curr) => acc + curr.value, 0) / data.length),
+    min: Math.round(Math.min(...data.map(d => d.value))),
+    max: Math.round(Math.max(...data.map(d => d.value))),
+    trend: Math.round((data[data.length - 1].value - data[0].value) * 10) / 10
+  };
+
+  return (
+    <section className="soil-moisture">
+      <h2><FaTint /> Soil Moisture Monitoring</h2>
+      <div className="moisture-display">
+        <div className="moisture-value">
+          <span>Current Moisture Level:</span>
+          <strong>{Math.round(soilMoisture)}%</strong>
+          <span className={`trend ${stats.trend >= 0 ? 'up' : 'down'}`}>
+            {stats.trend >= 0 ? '↑' : '↓'} {Math.abs(stats.trend)}%
+          </span>
+        </div>
+
+        <div className="moisture-bar-container">
+          <div 
+            className={`moisture-bar ${
+              soilMoisture < 30 ? 'low' :
+              soilMoisture > 70 ? 'high' : 'optimal'
+            }`}
+            style={{ width: `${soilMoisture}%` }}
+          ></div>
+        </div>
+        <div className="moisture-labels">
+          <span>Dry (30%)</span>
+          <span>Optimal (50%)</span>
+          <span>Wet (70%)</span>
+        </div>
+        
+        <div className="moisture-stats">
+          <div className="stat-item">
+            <span className="stat-label">24h Average</span>
+            <span className="stat-value">{stats.average}%</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">24h Low</span>
+            <span className="stat-value">{stats.min}%</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">24h High</span>
+            <span className="stat-value">{stats.max}%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const SchedulingAndRules = ({ automationRules, schedule, isAutoMode, setIsConfigureOpen, setConfigureTab }) => {
+  const [activeTab, setActiveTab] = useState('schedule');
+
+  return (
+    <section className="scheduling-rules">
+      <div className="tabs-container">
+        <div className="tabs-header">
+          <button 
+            className={`tab-button ${activeTab === 'schedule' ? 'active' : ''}`}
+            onClick={() => setActiveTab('schedule')}
+          >
+            <FaStopwatch /> Watering Schedule
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'rules' ? 'active' : ''}`}
+            onClick={() => setActiveTab('rules')}
+          >
+            <FaCog /> Automation Rules
+          </button>
+        </div>
+
+        <div className="tab-content">
+          {activeTab === 'schedule' && (
+            <div className="schedule-content">
+              <div className="content-header">
+                <h3>Active Schedule</h3>
+                {!isAutoMode && (
+                  <button 
+                    className="configure-button"
+                    onClick={() => {
+                      setConfigureTab('schedule');
+                      setIsConfigureOpen(true);
+                    }}
+                  >
+                    Configure Schedule
+                  </button>
+                )}
+              </div>
+              <div className="schedule-grid">
+                {schedule.map((item, index) => (
+                  <div key={index} className="schedule-item">
+                    <div className="schedule-time">
+                      <div className="time-info">
+                        <div className="day-container">
+                          <FaStopwatch className="schedule-icon" />
+                          <span className="day">{item.day}</span>
+                        </div>
+                        <span className="time">
+                          {new Date(`2000-01-01 ${item.time}`).toLocaleTimeString([], {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          })}
+                        </span>
+                      </div>
+                      <span className="duration">{item.duration}min</span>
+                    </div>
+                    {item.adjustForWeather && (
+                      <div className="weather-adjusted">
+                        <FaCloud className="weather-icon" />
+                        Weather Adjusted
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'rules' && (
+            <div className="rules-content">
+              <div className="content-header">
+                <h3>Active Rules</h3>
+                {!isAutoMode && (
+                  <button 
+                    className="configure-button"
+                    onClick={() => {
+                      setConfigureTab('rules');
+                      setIsConfigureOpen(true);
+                    }}
+                  >
+                    Configure Rules
+                  </button>
+                )}
+              </div>
+              <div className="rules-grid">
+                {automationRules.map((rule, index) => (
+                  <div key={index} className="rule-item">
+                    <div className="rule-details">
+                      <div className="rule-condition">
+                        <div className="rule-icon">
+                          {rule.condition === 'moisture' ? <FaTint /> :
+                           rule.condition === 'temperature' ? <FaThermometerHalf /> :
+                           rule.condition === 'rain' ? <FaUmbrella /> : <FaSun />}
+                        </div>
+                        When {rule.condition} is {rule.operator} {rule.value}
+                        {rule.condition === 'temperature' ? '°F' : '%'}
+                      </div>
+                      <div className="rule-action" data-action={rule.action}>
+                        {rule.action === 'start' 
+                          ? `Water for ${rule.duration}min` 
+                          : 'Stop watering'}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   );
 };
 
@@ -314,9 +457,7 @@ const SprinklerDashboard = () => {
       day: 'Monday',
       time: '06:00',
       duration: 30,
-      adjustForWeather: true,
-      minMoisture: 30,
-      rainThreshold: 40
+      adjustForWeather: true
     }
   ]);
 
@@ -326,6 +467,45 @@ const SprinklerDashboard = () => {
   const [tempRules, setTempRules] = useState([]);
   const [isAutoDeciding, setIsAutoDeciding] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [moistureHistory, setMoistureHistory] = useState([]);
+
+  const [location, setLocation] = useState(null);
+  const [locationError, setLocationError] = useState(null);
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+          setLocationError(null);
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          setLocationError('Unable to get your location. Using default location.');
+          // Use a default location (e.g., New York City)
+          setLocation({
+            latitude: 40.7128,
+            longitude: -74.0060
+          });
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      setLocationError('Geolocation is not supported by your browser');
+      // Use default location
+      setLocation({
+        latitude: 40.7128,
+        longitude: -74.0060
+      });
+    }
+  }, []);
 
   useEffect(() => {
     setTempSchedule(schedule);
@@ -334,17 +514,44 @@ const SprinklerDashboard = () => {
 
   // Simulate weather updates
   useEffect(() => {
-    const interval = setInterval(() => {
-      setWeather(prev => ({
-        ...prev,
-        temperature: prev.temperature + (Math.random() - 0.5) * 2,
-        humidity: Math.max(0, Math.min(100, prev.humidity + (Math.random() - 0.5) * 5)),
-        windSpeed: Math.max(0, Math.min(30, prev.windSpeed + (Math.random() - 0.5) * 2)),
-      }));
-      setSoilMoisture(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 3)));
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    const fetchData = async () => {
+      if (location) {
+        const weatherData = await fetchWeatherData(
+          location.latitude,
+          location.longitude
+        );
+        
+        if (weatherData) {
+          // Update current weather
+          setWeather({
+            temperature: weatherData.current.temperature,
+            humidity: weatherData.current.humidity,
+            conditions: weatherData.current.condition.description,
+            precipitation: weatherData.current.precipitation * 100,
+            windSpeed: weatherData.current.windSpeed,
+            windDirection: weatherData.current.windDirection,
+            uvIndex: weatherData.hourly?.[0]?.uvIndex || 0,
+            icon: weatherData.current.condition.icon
+          });
+
+          // Update forecast data
+          setForecast(weatherData.daily || []);
+        }
+
+        const moistureData = await fetchMoistureData();
+        if (moistureData) {
+          setSoilMoisture(moistureData.currentMoisture);
+          setMoistureHistory(moistureData.history || []);
+        }
+      }
+    };
+
+    if (location) {
+      fetchData();
+      const interval = setInterval(fetchData, 300000); // Update every 5 minutes
+      return () => clearInterval(interval);
+    }
+  }, [location]);
 
   // Enhanced automation logic
   useEffect(() => {
@@ -450,6 +657,8 @@ const SprinklerDashboard = () => {
     document.body.classList.toggle('dark-mode');
   };
 
+  const [forecast, setForecast] = useState([]);
+
   return (
     <div className={`dashboard ${isDarkMode ? 'dark-mode' : ''}`}>
       <header>
@@ -489,68 +698,32 @@ const SprinklerDashboard = () => {
           />
           <WeatherDetail
             icon={FaWind}
-            label="Wind Speed"
+            label="Wind"
             value={Math.round(weather.windSpeed)}
             unit="mph"
           />
           <WeatherDetail
             icon={FaUmbrella}
             label="Rain Chance"
-            value={weather.precipitation}
+            value={Math.round(forecast[0]?.precipitationChance || 0)}
             unit="%"
           />
           <WeatherDetail
-            icon={FaSun}
-            label="UV Index"
-            value={weather.uvIndex}
-            unit=""
-          />
-          <WeatherDetail
-            icon={FaTachometerAlt}
-            label="Pressure"
-            value={weather.pressure}
-            unit="hPa"
-          />
-          <WeatherDetail
-            icon={FaEye}
-            label="Visibility"
-            value={weather.visibility}
-            unit="mi"
-          />
-          <WeatherDetail
-            icon={FaCloud}
+            icon={getWeatherIcon(weather.icon)}
             label="Conditions"
             value={weather.conditions}
             unit=""
           />
         </div>
-        <WeeklyForecast />
+        <WeeklyForecast forecast={forecast} />
       </section>
 
       <div className="dashboard-grid">
-        <section className="soil-moisture">
-          <h2><FaTint /> Soil Moisture Monitoring</h2>
-          <div className="moisture-display">
-            <div className="moisture-value">
-              Current Moisture Level: <strong>{Math.round(soilMoisture)}%</strong>
-            </div>
-            <div className="moisture-bar-container">
-              <div 
-                className={`moisture-bar ${
-                  soilMoisture < 30 ? 'low' :
-                  soilMoisture > 70 ? 'high' : 'optimal'
-                }`}
-                style={{ width: `${soilMoisture}%` }}
-              ></div>
-            </div>
-            <div className="moisture-labels">
-              <span>Dry (30%)</span>
-              <span>Optimal (50%)</span>
-              <span>Wet (70%)</span>
-            </div>
-          </div>
-        </section>
-
+        <SoilMoistureSection 
+          soilMoisture={soilMoisture}
+          moistureHistory={moistureHistory}
+          isDarkMode={isDarkMode}
+        />
         <section className="system-status">
           <h2><FaCog /> System Status & Control</h2>
           <div className="status-content">
@@ -568,68 +741,42 @@ const SprinklerDashboard = () => {
             </div>
             <div className="status-display">
               <div className="status-main">
-                Status: {isSprinklerOn ? 'Active' : 'Inactive'}
-              </div>
-              <div className="status-sub">
-                Mode: {isAutoMode ? 'Automatic' : 'Manual'} Control
-              </div>
-              {isAutoMode && (
-                <div className="status-sub">
-                  Using {automationRules.length} automation rules
+                <span>Current Status</span>
+                <div className="status-badge" data-status={isSprinklerOn ? 'active' : 'inactive'}>
+                  {isSprinklerOn ? 'Active' : 'Inactive'}
                 </div>
-              )}
+              </div>
+              <div className="status-info">
+                <span>Operation Mode</span>
+                <div className="mode-badge" data-mode={isAutoMode ? 'auto' : 'manual'}>
+                  {isAutoMode ? 'Automatic' : 'Manual'} Control
+                </div>
+              </div>
+              <div className="next-schedule">
+                <span>Next Scheduled</span>
+                <span className="next-schedule-time">
+                  {schedule[0] ? 
+                    `${schedule[0].day} at ${new Date(`2000-01-01 ${schedule[0].time}`).toLocaleTimeString([], {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true
+                    })}` : 
+                    'No schedule'
+                  }
+                </span>
+              </div>
             </div>
           </div>
         </section>
       </div>
 
-      <section className="scheduling">
-        <div className="section-header">
-          <h2><FaStopwatch /> Scheduling & Automation</h2>
-          {!isAutoMode && (
-            <button onClick={() => setIsConfigureOpen(true)}>Configure</button>
-          )}
-        </div>
-        <div className="schedule-content">
-          <div className="active-schedule">
-            <h3>Active Schedule</h3>
-            <table className="schedule-table">
-              <thead>
-                <tr>
-                  <th>Day</th>
-                  <th>Time</th>
-                  <th>Duration</th>
-                  <th>Weather Adjusted</th>
-                </tr>
-              </thead>
-              <tbody>
-                {schedule.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.day}</td>
-                    <td>{item.time}</td>
-                    <td>{item.duration} minutes</td>
-                    <td>{item.adjustForWeather ? 'Yes' : 'No'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          <div className="active-rules">
-            <h3>Active Rules</h3>
-            {automationRules.map((rule, index) => (
-              <div key={index} className="rule-item">
-                <strong>If {rule.condition}</strong> is {rule.operator} <strong>{rule.value}{rule.condition === 'temperature' ? '°F' : '%'}</strong>:
-                <br />
-                <span className="rule-action">
-                  {rule.action === 'start' ? 'Start' : 'Stop'} watering
-                  {rule.action === 'start' && ` for ${rule.duration} minutes`}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <SchedulingAndRules 
+        automationRules={automationRules}
+        schedule={schedule}
+        isAutoMode={isAutoMode}
+        setIsConfigureOpen={setIsConfigureOpen}
+        setConfigureTab={setConfigureTab}
+      />
 
       {isSprinklerOn && schedule.length > 0 && (
         <div className="status-alert">
@@ -638,44 +785,60 @@ const SprinklerDashboard = () => {
       )}
 
       {isConfigureOpen && (
-        <div className="modal">
+        <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h2>Configure {configureTab === 'schedule' ? 'Schedule' : 'Rules'}</h2>
               <div className="tab-buttons">
                 <button 
-                  className={configureTab === 'schedule' ? 'active' : ''}
+                  className={`modal-button ${configureTab === 'schedule' ? 'active' : ''}`}
                   onClick={() => setConfigureTab('schedule')}
                 >
                   Schedule
                 </button>
                 <button 
-                  className={configureTab === 'rules' ? 'active' : ''}
+                  className={`modal-button ${configureTab === 'rules' ? 'active' : ''}`}
                   onClick={() => setConfigureTab('rules')}
                 >
                   Rules
                 </button>
               </div>
             </div>
-            {isAutoDeciding ? (
-              <div className="auto-deciding">
-                <p>Auto Mode is deciding optimal settings...</p>
-              </div>
-            ) : (
-              <>
-                {configureTab === 'schedule' ? (
-                  <ScheduleEditor schedule={tempSchedule} setSchedule={setTempSchedule} />
-                ) : (
-                  <AutomationRules rules={tempRules} setRules={setTempRules} />
-                )}
-                <div className="modal-footer">
-                  <button onClick={handleSaveChanges} className="save-button">Save Changes</button>
-                  <button onClick={handleCancelChanges} className="cancel-button">Cancel</button>
-                  <button onClick={handleAutoModeDecide} className="auto-decide-button">Let Auto Mode Decide</button>
+            
+            <div className="modal-body">
+              {isAutoDeciding ? (
+                <div className="auto-deciding">
+                  <div className="loader"></div>
+                  <p>Auto Mode is analyzing optimal settings...</p>
                 </div>
-              </>
-            )}
+              ) : (
+                <>
+                  {configureTab === 'schedule' ? (
+                    <ScheduleEditor schedule={tempSchedule} setSchedule={setTempSchedule} />
+                  ) : (
+                    <AutomationRules rules={tempRules} setRules={setTempRules} />
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button onClick={handleAutoModeDecide} className="modal-button auto-decide-button">
+                Let Auto Mode Decide
+              </button>
+              <button onClick={handleCancelChanges} className="modal-button cancel-button">
+                Cancel
+              </button>
+              <button onClick={handleSaveChanges} className="modal-button save-button">
+                Save Changes
+              </button>
+            </div>
           </div>
+        </div>
+      )}
+      {locationError && (
+        <div className="location-error">
+          {locationError}
         </div>
       )}
     </div>

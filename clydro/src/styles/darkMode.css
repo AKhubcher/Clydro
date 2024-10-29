@@ -1,0 +1,52 @@
+/* Dark mode specific styles */
+.dark-mode .weather-overview,
+.dark-mode .soil-moisture,
+.dark-mode .system-status,
+.dark-mode .scheduling-rules {
+  background: rgba(44, 62, 80, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .weather-detail {
+  background: rgba(44, 62, 80, 0.95);
+}
+
+.dark-mode .weather-label {
+  color: #bdc3c7;
+}
+
+.dark-mode .weather-value {
+  color: #ecf0f1;
+}
+
+.dark-mode .forecast-day {
+  background: rgba(44, 62, 80, 0.95);
+}
+
+.dark-mode .forecast-details {
+  color: #bdc3c7;
+}
+
+.dark-mode .schedule-time .day {
+  color: #ecf0f1;
+}
+
+.dark-mode .schedule-duration {
+  color: #bdc3c7;
+}
+
+.dark-mode .tabs-container {
+  background: rgba(44, 62, 80, 0.95);
+}
+
+.dark-mode .tab-button {
+  color: #bdc3c7;
+}
+
+.dark-mode .tab-button.active {
+  background: #2980b9;
+}
+
+.dark-mode header {
+  background: rgba(44, 62, 80, 0.95);
+} 

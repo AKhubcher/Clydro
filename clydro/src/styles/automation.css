@@ -1,0 +1,202 @@
+.automation-rules-container {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.automation-container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.automation-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.automation-rules-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+}
+
+.automation-rule-card {
+    background: var(--surface-background);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--surface-variant);
+}
+
+.automation-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.automation-label {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+}
+
+.automation-value {
+    font-size: 1.1rem;
+    padding: 8px 20px;
+    border-radius: 25px;
+    background: #3b82f6;
+    color: white;
+    font-weight: 500;
+}
+
+.automation-value.inactive {
+    background: #ef4444;
+}
+
+.automation-value.active {
+    background: #22c55e;
+}
+
+.rules-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+}
+
+.rule-item {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.rule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 2px solid;
+    margin-bottom: 12px;
+}
+
+.rule-title {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1.1em;
+}
+
+.rule-condition {
+    font-size: 0.95em;
+    color: #7f8c8d;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    margin: 8px 0;
+}
+
+.rule-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 500;
+    margin-top: 8px;
+}
+
+.rule-action[data-action="water"] {
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+    border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.rule-action[data-action="stop"] {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.rule-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Configure button styles - Add to both automation.css and scheduling.css */
+.configure-button {
+    padding: 8px 16px;
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.configure-button:hover {
+    background: rgba(52, 152, 219, 0.2);
+    transform: translateY(-2px);
+}
+
+.configure-button i {
+    font-size: 1.1em;
+}
+
+/* Dark mode adjustments */
+.dark-mode .rule-item {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(52, 152, 219, 0.2);
+}
+
+.dark-mode .rule-title {
+    color: #ecf0f1;
+}
+
+.dark-mode .rule-condition {
+    color: #bdc3c7;
+}
+
+.dark-mode .configure-button {
+    background: rgba(52, 152, 219, 0.15);
+    border-color: rgba(52, 152, 219, 0.3);
+}
+
+/* Color coding for different rule types */
+.rule-item[data-type="moisture"] {
+    border-left: 4px solid #3498db;
+}
+
+.rule-item[data-type="moisture"] .rule-header {
+    border-bottom-color: #3498db;
+}
+
+.rule-item[data-type="temperature"] {
+    border-left: 4px solid #e67e22;
+}
+
+.rule-item[data-type="temperature"] .rule-header {
+    border-bottom-color: #e67e22;
+}
+
+.rule-item[data-type="weather"] {
+    border-left: 4px solid #27ae60;
+}
+
+.rule-item[data-type="weather"] .rule-header {
+    border-bottom-color: #27ae60;
+}
