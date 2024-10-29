@@ -1,0 +1,122 @@
+.system-status {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 15px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+}
+
+.status-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.power-control {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.status-display {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.status-main,
+.status-info,
+.next-schedule {
+  display: grid;
+  grid-template-columns: 1fr auto;  /* Align text and buttons */
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.status-main span:first-child,
+.status-info span:first-child,
+.next-schedule span:first-child {
+  font-size: 0.95em;
+  color: #7f8c8d;
+}
+
+.status-badge,
+.mode-badge,
+.next-schedule-time {
+  justify-self: end;  /* Align to the right */
+}
+
+.next-schedule {
+  border-bottom: none;  /* Remove border from last item */
+}
+
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge[data-status="active"] {
+  background: #27ae60;
+  color: white;
+}
+
+.status-badge[data-status="inactive"] {
+  background: #e74c3c;
+  color: white;
+}
+
+.mode-badge {
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.9em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #3498db;
+  color: white;
+  display: inline-block;
+}
+
+.next-schedule {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  font-size: 0.95em;
+}
+
+.next-schedule-time {
+  font-weight: 600;
+  color: #3498db;
+}
+
+.dark-mode .system-status {
+  background: rgba(44, 62, 80, 0.95);
+}
+
+.dark-mode .power-control,
+.dark-mode .status-display {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .status-main,
+.dark-mode .status-info {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .next-schedule-time {
+  color: #5dade2;
+} 
