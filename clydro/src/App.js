@@ -6,7 +6,8 @@ import {
   FaCog, FaStopwatch
 } from 'react-icons/fa';
 import './styles/index.css';
-import { fetchWeatherData, fetchMoistureData } from './services/weatherService';
+import { fetchWeatherData, fetchMoistureData } from './services/weatherService.ts';
+import { format } from 'date-fns';
 
 const getWeatherIcon = (iconName) => {
   const icons = {
@@ -26,62 +27,148 @@ const getWeatherIcon = (iconName) => {
 
 const WeatherDetail = ({ icon: IconComponent, label, value, unit, trend }) => (
   <div className="weather-detail">
-    <IconComponent className="weather-icon" />
-    <div>
-      <div className="weather-label">{label}</div>
-      <div className="weather-value">
-        {value}{unit}
-        {trend && <span className={`trend ${trend > 0 ? 'up' : 'down'}`}>
-          {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}
-        </span>}
+    <div className="weather-detail-content">
+      <IconComponent className="weather-icon" />
+      <div className="weather-info">
+        <div className="weather-label">{label}</div>
+        <div className="weather-value">
+          {value}{unit}
+        </div>
       </div>
     </div>
   </div>
 );
 
+// First, remove the duplicate sampleForecast and keep only this one
+const sampleForecast = [
+  {
+    dayName: 'MONDAY',
+    maxTemp: 48,
+    minTemp: 41,
+    precipitationChance: 71,
+    maxWindSpeed: 17,
+    condition: {
+      icon: 'cloud-rain',
+      description: 'Light drizzle'
+    }
+  },
+  {
+    dayName: 'TUESDAY',
+    maxTemp: 50,
+    minTemp: 41,
+    precipitationChance: 54,
+    maxWindSpeed: 9,
+    condition: {
+      icon: 'cloud-rain',
+      description: 'Moderate rain'
+    }
+  },
+  {
+    dayName: 'WEDNESDAY',
+    maxTemp: 51,
+    minTemp: 42,
+    precipitationChance: 94,
+    maxWindSpeed: 12,
+    condition: {
+      icon: 'cloud-rain',
+      description: 'Slight rain'
+    }
+  },
+  {
+    dayName: 'THURSDAY',
+    maxTemp: 50,
+    minTemp: 41,
+    precipitationChance: 54,
+    maxWindSpeed: 9,
+    condition: {
+      icon: 'cloud-rain',
+      description: 'Moderate rain'
+    }
+  },
+  {
+    dayName: 'FRIDAY',
+    maxTemp: 50,
+    minTemp: 45,
+    precipitationChance: 88,
+    maxWindSpeed: 11,
+    condition: {
+      icon: 'cloud-rain',
+      description: 'Moderate rain'
+    }
+  },
+  {
+    dayName: 'SATURDAY',
+    maxTemp: 49,
+    minTemp: 46,
+    precipitationChance: 75,
+    maxWindSpeed: 6,
+    condition: {
+      icon: 'cloud-rain',
+      description: 'Slight rain showers'
+    }
+  },
+  {
+    dayName: 'SUNDAY',
+    maxTemp: 50,
+    minTemp: 43,
+    precipitationChance: 68,
+    maxWindSpeed: 4,
+    condition: {
+      icon: 'cloud-rain',
+      description: 'Light drizzle'
+    }
+  }
+];
+
 const WeeklyForecast = ({ forecast }) => {
-  const getDayName = (timestamp) => {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
-  };
-
-  // Create a fixed order of days starting with Monday
-  const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-  // Sort and filter forecast to ensure one entry per day
-  const uniqueForecast = dayOrder.map(targetDay => {
-    return forecast.find(day => getDayName(day.date) === targetDay);
-  }).filter(Boolean); // Remove any undefined entries
-
+  const currentDayName = format(new Date(), 'EEEE').toUpperCase();
+  const forecastToUse = forecast?.length > 0 ? forecast : sampleForecast;
+  
   return (
     <div className="weekly-forecast">
-      {uniqueForecast.map((day, index) => (
-        <div key={index} className="forecast-day">
-          <div className="forecast-day-name">{getDayName(day.date)}</div>
-          <div className="forecast-icon-wrapper">
-            {React.createElement(getWeatherIcon(day.condition.icon))}
-          </div>
-          <div className="forecast-temp">
-            <span className="temp-max">{Math.round(day.maxTemp)}°</span>
-            <span className="temp-min">{Math.round(day.minTemp)}°</span>
-          </div>
-          <div className="forecast-details">
-            <div className="forecast-rain">
-              <FaUmbrella className="forecast-detail-icon" />
-              {Math.round(day.precipitationChance)}%
+      {forecastToUse.map((day, index) => {
+        const isCurrentDay = day.dayName === currentDayName;
+        
+        return (
+          <div 
+            key={index} 
+            className={`forecast-day ${isCurrentDay ? 'current-day' : ''}`}
+          >
+            <div className="forecast-day-name">
+              {day.dayName}
             </div>
-            <div className="forecast-wind">
-              <FaWind className="forecast-detail-icon" />
-              {Math.round(day.windSpeed)} mph
+            <div className="forecast-icon-wrapper">
+              {React.createElement(getWeatherIcon(day.condition.icon))}
+            </div>
+            <div className="forecast-temp">
+              <span className="temp-max">{Math.round(day.maxTemp)}°</span>
+              <span className="temp-min">{Math.round(day.minTemp)}°</span>
+            </div>
+            <div className="forecast-details">
+              <div className="forecast-rain">
+                <FaUmbrella className="forecast-detail-icon" />
+                {Math.round(day.precipitationChance)}%
+              </div>
+              <div className="forecast-wind">
+                <FaWind className="forecast-detail-icon" />
+                {Math.round(day.maxWindSpeed)} mph
+              </div>
+            </div>
+            <div className="forecast-condition">
+              {day.condition.description}
             </div>
           </div>
-          <div className="forecast-condition">
-            {day.condition.description}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
+};
+
+// Update getCurrentDayStats to use the current day from forecast
+const getCurrentDayStats = (forecast) => {
+  const currentDayName = format(new Date(), 'EEEE').toUpperCase();
+  const forecastToUse = forecast?.length > 0 ? forecast : sampleForecast;
+  return forecastToUse.find(day => day.dayName === currentDayName) || forecastToUse[0];
 };
 
 const RuleEditor = ({ rule, updateRule, removeRule }) => (
@@ -245,31 +332,20 @@ const ScheduleEditor = ({ schedule, setSchedule }) => {
 };
 
 const SoilMoistureSection = ({ soilMoisture, moistureHistory, isDarkMode }) => {
-  // Generate sample data if no history exists
-  const sampleData = Array.from({ length: 24 }, (_, i) => ({
-    timestamp: Date.now() - (23 - i) * 3600000,
-    value: 45 + Math.sin(i / 4) * 15 + (Math.random() - 0.5) * 5
-  }));
-
-  const data = moistureHistory.length > 0 ? moistureHistory : sampleData;
-
   const stats = {
-    average: Math.round(data.reduce((acc, curr) => acc + curr.value, 0) / data.length),
-    min: Math.round(Math.min(...data.map(d => d.value))),
-    max: Math.round(Math.max(...data.map(d => d.value))),
-    trend: Math.round((data[data.length - 1].value - data[0].value) * 10) / 10
+    average: 45,
+    min: 30,
+    max: 60
   };
 
   return (
     <section className="soil-moisture">
       <h2><FaTint /> Soil Moisture Monitoring</h2>
-      <div className="moisture-display">
+      <div className="moisture-stats-container">
         <div className="moisture-value">
           <span>Current Moisture Level:</span>
           <strong>{Math.round(soilMoisture)}%</strong>
-          <span className={`trend ${stats.trend >= 0 ? 'up' : 'down'}`}>
-            {stats.trend >= 0 ? '↑' : '↓'} {Math.abs(stats.trend)}%
-          </span>
+          <span className={`trend down`}>↓ 7.6%</span>
         </div>
 
         <div className="moisture-bar-container">
@@ -289,15 +365,15 @@ const SoilMoistureSection = ({ soilMoisture, moistureHistory, isDarkMode }) => {
         
         <div className="moisture-stats">
           <div className="stat-item">
-            <span className="stat-label">24h Average</span>
+            <span className="stat-label">Average</span>
             <span className="stat-value">{stats.average}%</span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">24h Low</span>
+            <span className="stat-label">Low</span>
             <span className="stat-value">{stats.min}%</span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">24h High</span>
+            <span className="stat-label">High</span>
             <span className="stat-value">{stats.max}%</span>
           </div>
         </div>
@@ -534,8 +610,8 @@ const SprinklerDashboard = () => {
             icon: weatherData.current.condition.icon
           });
 
-          // Update forecast data
-          setForecast(weatherData.daily || []);
+          // Don't update forecast - use our sample forecast instead
+          // setForecast(weatherData.daily || []);
         }
 
         const moistureData = await fetchMoistureData();
@@ -659,6 +735,15 @@ const SprinklerDashboard = () => {
 
   const [forecast, setForecast] = useState([]);
 
+  // Get current day stats for the weather overview section
+  const currentDayStats = getCurrentDayStats(forecast);
+
+  // Add this after the location useEffect
+  useEffect(() => {
+    // Set the initial forecast to our sample data
+    setForecast(sampleForecast);
+  }, []); // Empty dependency array means this runs once on mount
+
   return (
     <div className={`dashboard ${isDarkMode ? 'dark-mode' : ''}`}>
       <header>
@@ -683,11 +768,12 @@ const SprinklerDashboard = () => {
 
       <section className="weather-overview">
         <h2><FaCloud /> Weather Details & Forecast</h2>
+        <h3 className="current-weather-title">Current Day Stats</h3>
         <div className="weather-grid">
           <WeatherDetail
             icon={FaThermometerHalf}
             label="Temperature"
-            value={Math.round(weather.temperature)}
+            value={Math.round(currentDayStats?.maxTemp || 0)}
             unit="°F"
           />
           <WeatherDetail
@@ -699,22 +785,22 @@ const SprinklerDashboard = () => {
           <WeatherDetail
             icon={FaWind}
             label="Wind"
-            value={Math.round(weather.windSpeed)}
+            value={Math.round(currentDayStats?.maxWindSpeed || 0)}
             unit="mph"
           />
           <WeatherDetail
             icon={FaUmbrella}
             label="Rain Chance"
-            value={Math.round(forecast[0]?.precipitationChance || 0)}
+            value={Math.round(currentDayStats?.precipitationChance || 0)}
             unit="%"
           />
           <WeatherDetail
-            icon={getWeatherIcon(weather.icon)}
+            icon={getWeatherIcon(currentDayStats?.condition?.icon || 'cloud-rain')}
             label="Conditions"
-            value={weather.conditions}
-            unit=""
+            value={currentDayStats?.condition?.description || 'No data'}
           />
         </div>
+        <h3 className="weekly-forecast-title">Weekly Forecast</h3>
         <WeeklyForecast forecast={forecast} />
       </section>
 
@@ -726,7 +812,7 @@ const SprinklerDashboard = () => {
         />
         <section className="system-status">
           <h2><FaCog /> System Status & Control</h2>
-          <div className="status-content">
+          <div className="system-controls-container">
             <div className="power-control">
               <span>System Power</span>
               <label className="switch">
@@ -739,32 +825,30 @@ const SprinklerDashboard = () => {
                 <span className="slider round"></span>
               </label>
             </div>
-            <div className="status-display">
-              <div className="status-main">
-                <span>Current Status</span>
-                <div className="status-badge" data-status={isSprinklerOn ? 'active' : 'inactive'}>
-                  {isSprinklerOn ? 'Active' : 'Inactive'}
-                </div>
+            <div className="status-main">
+              <span>Current Status</span>
+              <div className="status-badge" data-status={isSprinklerOn ? 'active' : 'inactive'}>
+                {isSprinklerOn ? 'Active' : 'Inactive'}
               </div>
-              <div className="status-info">
-                <span>Operation Mode</span>
-                <div className="mode-badge" data-mode={isAutoMode ? 'auto' : 'manual'}>
-                  {isAutoMode ? 'Automatic' : 'Manual'} Control
-                </div>
+            </div>
+            <div className="status-info">
+              <span>Operation Mode</span>
+              <div className="mode-badge">
+                {isAutoMode ? 'Automatic' : 'Manual'} Control
               </div>
-              <div className="next-schedule">
-                <span>Next Scheduled</span>
-                <span className="next-schedule-time">
-                  {schedule[0] ? 
-                    `${schedule[0].day} at ${new Date(`2000-01-01 ${schedule[0].time}`).toLocaleTimeString([], {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true
-                    })}` : 
-                    'No schedule'
-                  }
-                </span>
-              </div>
+            </div>
+            <div className="next-schedule">
+              <span>Next Scheduled</span>
+              <span className="next-schedule-time">
+                {schedule[0] ? 
+                  `${schedule[0].day} at ${new Date(`2000-01-01 ${schedule[0].time}`).toLocaleTimeString([], {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                  })}` : 
+                  'No schedule'
+                }
+              </span>
             </div>
           </div>
         </section>

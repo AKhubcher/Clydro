@@ -45,6 +45,10 @@
   color: white;
 }
 
+.tab-button:hover {
+  transform: translateY(-2px);
+}
+
 /* Updated schedule grid for calendar-like layout */
 .schedule-grid {
   display: grid;
@@ -346,6 +350,12 @@
   gap: 15px;
   align-items: start;
   border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.schedule-item-editor:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .schedule-field {
@@ -366,6 +376,12 @@
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: white;
+}
+
+.schedule-field select:hover,
+.schedule-field input:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .weather-adjust-toggle {
@@ -395,6 +411,10 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.modal-button:hover {
+  transform: translateY(-2px);
 }
 
 .save-button {
@@ -550,4 +570,73 @@
 .dark-mode .rule-item {
   background: rgba(0, 0, 0, 0.2);
   border-color: rgba(52, 152, 219, 0.2);
+}
+
+.weather-adjust-toggle:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+/* 24-hour average temperature sections */
+.temp-averages {
+  display: flex;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 15px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.temp-section {
+  flex: 1;
+  padding: 15px;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.temp-section:first-child {
+  border-right: none;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.temp-section:last-child {
+  border-left: none;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.temp-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.temp-label {
+  font-size: 0.9em;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.temp-value {
+  font-size: 1.4em;
+  font-weight: 600;
+}
+
+.high-temp {
+  color: #e74c3c;
+}
+
+.low-temp {
+  color: #3498db;
+}
+
+/* Dark mode adjustments */
+.dark-mode .temp-section {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .temp-label {
+  color: #94a3b8;
 }

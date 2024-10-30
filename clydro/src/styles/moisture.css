@@ -2,7 +2,7 @@
 .soil-moisture {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(52, 152, 219, 0.2);
   border-radius: 15px;
   padding: 25px;
   margin-bottom: 15px;
@@ -10,27 +10,28 @@
 }
 
 .moisture-display {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
 }
 
 .moisture-value {
-  font-size: 1.3em;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  color: #2c3e50;
+  border-radius: 12px;
+  padding: 20px;
   margin-bottom: 20px;
-  display: flex;
-  align-items: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .moisture-value strong {
   font-size: 1.4em;
   color: #3498db;
-  margin-left: 5px;
+  margin: 0 8px;
 }
 
 .moisture-bar-container {
   background: rgba(236, 240, 241, 0.6);
+  border: 1px solid rgba(52, 152, 219, 0.2);
   border-radius: 15px;
   height: 25px;
   margin: 15px 0;
@@ -68,22 +69,18 @@
 .moisture-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+  gap: 12px;
   margin-top: 20px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
 }
 
 .stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  transition: transform 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 15px;
+  border-radius: 12px;
   text-align: center;
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .stat-item:hover {
@@ -93,17 +90,24 @@
 .stat-label {
   font-size: 0.9em;
   color: #7f8c8d;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .stat-value {
-  font-size: 1.3em;
+  font-size: 1.4em;
   font-weight: bold;
   color: #3498db;
+  display: block;
+  margin-top: 4px;
+}
+
+.stat-label::after {
+  content: none;
 }
 
 .dark-mode .soil-moisture {
-  background: rgba(44, 62, 80, 0.95);
+  background: #313d4e;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .dark-mode .moisture-display {
@@ -116,6 +120,30 @@
 
 .dark-mode .stat-value {
   color: #5dade2;
+}
+
+.dark-mode .moisture-value {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  color: #ecf0f1;
+}
+
+.dark-mode .stat-item {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.dark-mode .moisture-bar-container {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.dark-mode .moisture-value strong {
+  color: #5dade2;
+}
+
+.dark-mode .stat-label::after {
+  color: #bdc3c7;
 }
 
 .trend {
@@ -162,4 +190,133 @@
 .dark-mode .mini-graph {
   background: rgba(0, 0, 0, 0.2);
   border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* 24-hour moisture average sections */
+.moisture-averages {
+  display: flex;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 15px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.moisture-section {
+  flex: 1;
+  padding: 15px;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.moisture-section:first-child {
+  border-right: none;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.moisture-section:last-child {
+  border-left: none;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.moisture-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.moisture-avg-label {
+  font-size: 0.9em;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.moisture-avg-value {
+  font-size: 1.4em;
+  font-weight: 600;
+}
+
+.high-moisture {
+  color: #27ae60;
+}
+
+.low-moisture {
+  color: #e74c3c;
+}
+
+/* Dark mode adjustments */
+.dark-mode .moisture-section {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .moisture-avg-label {
+  color: #94a3b8;
+}
+
+.dark-mode .moisture-value,
+.dark-mode .stat-item,
+.dark-mode .moisture-bar-container {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .moisture-labels {
+  color: #bdc3c7;
+}
+
+.dark-mode .stat-label {
+  color: #bdc3c7;
+}
+
+.dark-mode .stat-value {
+  color: #5dade2;
+}
+
+/* Update dark mode styles */
+.dark-mode .soil-moisture {
+  background: #313d4e;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.moisture-value strong {
+  font-size: 1.4em;
+  color: #3498db;
+  margin: 0 8px;
+}
+
+/* Group moisture bar with current level */
+.moisture-value-container {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Move moisture bar and labels inside the container */
+.moisture-value-container .moisture-bar-container {
+  margin-top: 20px;
+}
+
+.moisture-value-container .moisture-labels {
+  margin-top: 8px;
+}
+
+/* Add container for moisture stats */
+.moisture-stats-container {
+  background: #313d4e;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+
+.dark-mode .moisture-value,
+.dark-mode .stat-item,
+.dark-mode .moisture-bar-container {
+  background: #1d2a31;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }

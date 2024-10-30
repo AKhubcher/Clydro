@@ -1,7 +1,7 @@
 .system-status {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(52, 152, 219, 0.2);
   border-radius: 15px;
   padding: 25px;
   margin-bottom: 15px;
@@ -9,19 +9,31 @@
 }
 
 .status-content {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  margin-top: 20px;
 }
 
-.power-control {
+.status-main, .status-info, .next-schedule {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 12px;
+}
+
+.power-control {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(52, 152, 219, 0.2);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .status-display {
@@ -31,19 +43,10 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.status-main,
-.status-info,
-.next-schedule {
-  display: grid;
-  grid-template-columns: 1fr auto;  /* Align text and buttons */
-  align-items: center;
-  padding: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
 .status-main span:first-child,
 .status-info span:first-child,
-.next-schedule span:first-child {
+.next-schedule span:first-child,
+.power-control span:first-child {
   font-size: 0.95em;
   color: #7f8c8d;
 }
@@ -51,15 +54,15 @@
 .status-badge,
 .mode-badge,
 .next-schedule-time {
-  justify-self: end;  /* Align to the right */
+  justify-self: end;
 }
 
 .next-schedule {
-  border-bottom: none;  /* Remove border from last item */
+  border-bottom: none;
 }
 
 .status-badge {
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 20px;
   font-size: 0.9em;
   font-weight: 600;
@@ -68,25 +71,25 @@
 }
 
 .status-badge[data-status="active"] {
-  background: #27ae60;
-  color: white;
+  background: rgba(46, 204, 113, 0.2);
+  color: #27ae60;
+  border: 1px solid rgba(46, 204, 113, 0.4);
 }
 
 .status-badge[data-status="inactive"] {
-  background: #e74c3c;
-  color: white;
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.4);
 }
 
 .mode-badge {
-  padding: 6px 12px;
-  border-radius: 15px;
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+  border: 1px solid rgba(52, 152, 219, 0.4);
+  padding: 8px 16px;
+  border-radius: 20px;
   font-size: 0.9em;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  background: #3498db;
-  color: white;
-  display: inline-block;
 }
 
 .next-schedule {
@@ -103,20 +106,86 @@
 }
 
 .dark-mode .system-status {
-  background: rgba(44, 62, 80, 0.95);
+  background: #313d4e;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .dark-mode .power-control,
+.dark-mode .status-main,
+.dark-mode .status-info,
+.dark-mode .next-schedule,
 .dark-mode .status-display {
   background: rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.dark-mode .status-main,
-.dark-mode .status-info {
-  border-color: rgba(255, 255, 255, 0.1);
+.dark-mode .status-main span:first-child,
+.dark-mode .status-info span:first-child,
+.dark-mode .next-schedule span:first-child,
+.dark-mode .power-control span:first-child {
+  color: #bdc3c7;
 }
 
 .dark-mode .next-schedule-time {
   color: #5dade2;
+}
+
+/* Group system power with status */
+.status-power-container {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-power-container .power-control {
+  margin-bottom: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* Add container for system power and status */
+.system-power-status-container {
+  background: #1d2a31;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+
+.dark-mode .power-control,
+.dark-mode .status-main,
+.dark-mode .status-info,
+.dark-mode .next-schedule {
+  background: #1d2a31;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Add container for all system controls */
+.system-controls-container {
+  background: #313d4e;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+
+/* Update dark mode styles */
+.dark-mode .system-status {
+  background: #313d4e;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .power-control,
+.dark-mode .status-main,
+.dark-mode .status-info,
+.dark-mode .next-schedule {
+  background: #1d2a31;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 } 

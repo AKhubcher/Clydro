@@ -2,7 +2,7 @@
 .weather-overview {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(52, 152, 219, 0.2);
   border-radius: 15px;
   padding: 25px;
   margin-bottom: 15px;
@@ -12,44 +12,53 @@
 .weather-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  gap: 12px;
+  margin: 12px 0;
 }
 
 .weather-detail {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.weather-detail-content {
   display: flex;
   align-items: center;
-  gap: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  gap: 12px;
 }
 
 .weather-icon {
-  font-size: 2em;
+  font-size: 1.8em;
   color: #3498db;
-  min-width: 40px;
-  text-align: center;
+  min-width: 35px;
+}
+
+.weather-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .weather-label {
   font-size: 0.9em;
   color: #4a4a4a;
-  margin-bottom: 4px;
 }
 
 .weather-value {
-  font-size: 1.2em;
-  font-weight: bold;
+  font-size: 1.4em;
+  font-weight: 600;
   color: #2c3e50;
 }
 
 .weekly-forecast {
   display: flex;
   overflow-x: auto;
-  gap: 15px;
-  padding: 20px 0;
-  margin-top: 20px;
+  gap: 8px;
+  padding: 12px 8px;
+  margin-top: 12px;
   scrollbar-width: thin;
   scrollbar-color: #3498db transparent;
 }
@@ -69,30 +78,42 @@
 
 .forecast-day {
   background: rgba(255, 255, 255, 0.95);
-  padding: 20px;
+  padding: 12px;
   min-width: 160px;
+  max-width: 160px;
   border-radius: 12px;
   text-align: center;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  margin: 1px;
 }
 
-.forecast-day:hover {
-  transform: translateY(-5px);
+.forecast-day.current-day {
+  background: rgba(255, 235, 59, 0.15);
+  border: 2px solid #FFD700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  transform: scale(1.02);
 }
 
 .forecast-day-name {
-  font-weight: bold;
+  font-weight: 600;
   font-size: 1.1em;
   color: #2c3e50;
-  margin-bottom: 15px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+  text-transform: uppercase;
 }
 
 .forecast-icon-wrapper {
-  font-size: 2.2em;
+  font-size: 2em;
   color: #3498db;
-  margin: 15px 0;
-  height: 50px;
+  margin: 0;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,8 +123,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px;
-  margin: 15px 0;
+  gap: 12px;
+  margin: 2px 0;
   font-size: 1.1em;
 }
 
@@ -120,11 +141,11 @@
 .forecast-details {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
   font-size: 0.9em;
   color: #7f8c8d;
-  margin-top: 10px;
-  padding-top: 10px;
+  margin-top: 4px;
+  padding-top: 4px;
   border-top: 1px solid rgba(52, 152, 219, 0.2);
 }
 
@@ -132,7 +153,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .forecast-detail-icon {
@@ -140,7 +161,7 @@
 }
 
 .forecast-condition {
-  margin-top: 8px;
+  margin-top: 2px;
   font-size: 0.9em;
   color: #34495e;
   font-weight: 500;
@@ -148,10 +169,12 @@
 
 .dark-mode .forecast-day {
   background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .dark-mode .forecast-day-name {
   color: #ecf0f1;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark-mode .forecast-condition {
@@ -180,4 +203,158 @@
     border-radius: 0 0 12px 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin: 0 20px 20px 20px;
-} 
+}
+
+.forecast-day-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.forecast-day-name {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: #2c3e50;
+}
+
+.forecast-date {
+  font-size: 0.9em;
+  color: #7f8c8d;
+}
+
+/* Dark mode support */
+.dark-mode .forecast-day-name {
+  color: #ecf0f1;
+}
+
+.dark-mode .forecast-date {
+  color: #bdc3c7;
+}
+
+/* Add title style */
+.current-weather-title {
+  font-size: 1.2em;
+  color: #2c3e50;
+  margin: 20px 0 8px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+/* Dark mode support */
+.dark-mode .current-weather-title {
+  color: #ecf0f1;
+}
+
+.dark-mode .weather-label {
+  color: #bdc3c7;
+}
+
+.dark-mode .weather-value {
+  color: #ecf0f1;
+}
+
+/* Add weekly forecast title style */
+.weekly-forecast-title {
+  font-size: 1.2em;
+  color: #2c3e50;
+  margin: 24px 0 8px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+/* Update current day highlight */
+.forecast-day.current-day {
+  background: rgba(255, 235, 59, 0.15);
+  border: 3px solid #FFD700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+/* Dark mode support for new elements */
+.dark-mode .weekly-forecast-title {
+  color: #ecf0f1;
+}
+
+.dark-mode .forecast-day.current-day {
+  background: rgba(255, 235, 59, 0.2);
+  border: 3px solid #FFD700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+.forecast-day.current-day {
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+  transform: scale(1.02);
+}
+
+.forecast-day {
+  padding: 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.forecast-day-name {
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-transform: capitalize;
+}
+
+/* Keep all the existing styles up until the dark mode section, then replace the dark mode styles with these: */
+
+/* Dark mode styles */
+.dark-mode .weather-overview {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .weather-detail {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .forecast-day {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .forecast-day.current-day {
+  background: rgba(255, 235, 59, 0.1);
+  border: 2px solid #FFD700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.dark-mode .forecast-day-name {
+  color: #ecf0f1;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .forecast-condition {
+  color: #bdc3c7;
+}
+
+.dark-mode .current-weather-title,
+.dark-mode .weekly-forecast-title {
+  color: #ecf0f1;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .weather-label {
+  color: #bdc3c7;
+}
+
+.dark-mode .weather-value {
+  color: #ecf0f1;
+}
+
+.dark-mode .forecast-details {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .forecast-rain,
+.dark-mode .forecast-wind {
+  color: #bdc3c7;
+}
+
+/* Remove all duplicate rules at the bottom of the file */
