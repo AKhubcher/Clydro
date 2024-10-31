@@ -188,4 +188,24 @@
 .dark-mode .next-schedule {
   background: #1d2a31;
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Light mode - make interior containers white */
+.power-control,
+.status-main,
+.status-info,
+.next-schedule,
+.system-controls-container {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+/* Update dark mode to match exterior container color */
+.dark-mode .power-control,
+.dark-mode .status-main,
+.dark-mode .status-info,
+.dark-mode .next-schedule,
+.dark-mode .system-controls-container {
+    background: #313d4e;
+    border: 1px solid #1C2834;
 } 

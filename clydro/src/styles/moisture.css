@@ -320,3 +320,23 @@
   background: #1d2a31;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+/* Light mode - make interior containers white */
+.moisture-value-container,
+.moisture-stats-container,
+.moisture-value,
+.stat-item,
+.moisture-bar-container {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+/* Keep original dark mode styles */
+.dark-mode .moisture-value-container,
+.dark-mode .moisture-stats-container,
+.dark-mode .moisture-value,
+.dark-mode .stat-item,
+.dark-mode .moisture-bar-container {
+    background: #313d4e;
+    border: 1px solid #1C2834;
+}
