@@ -1,150 +1,231 @@
-import { fetchWeatherApi } from 'openmeteo';
+import { format } from 'date-fns';
 
-export interface ProcessedWeatherData {
-  current: {
-    temperature: number;
-    humidity: number;
-    precipitation: number;
-    rain: number;
-    windSpeed: number;
-    condition: WeatherDescription;
+interface WeatherPoint {
+  properties: {
+    forecast: string;
+    forecastHourly: string;
+    forecastGridData: string;
+    gridId: string;
+    gridX: number;
+    gridY: number;
+  }
+}
+
+interface WeatherForecast {
+  properties: {
+    periods: Array<{
+      name: string;
+      startTime: string;
+      temperature: number;
+      windSpeed: string;
+      icon: string;
+      shortForecast: string;
+      detailedForecast: string;
+      probabilityOfPrecipitation: {
+        value: number;
+      };
+    }>;
+  }
+}
+
+interface GridDataForecast {
+  properties: {
+    temperature: {
+      values: Array<{
+        validTime: string;
+        value: number;
+      }>;
+    };
+    probabilityOfPrecipitation: {
+      values: Array<{
+        validTime: string;
+        value: number;
+      }>;
+    };
+    relativeHumidity: {
+      values: Array<{
+        validTime: string;
+        value: number;
+      }>;
+    };
+  }
+}
+
+interface DailyForecast {
+  date: string;
+  dayName: string;
+  maxTemp: number;
+  minTemp: number | null;
+  maxWindSpeed: number;
+  precipitationChance: number;
+  condition: {
+    description: string;
+    icon: string;
   };
-  daily: Array<{
-    date: number;
-    dayName: string;
-    maxTemp: number;
-    minTemp: number;
-    precipitationChance: number;
-    rainSum: number;
-    maxWindSpeed: number;
-    condition: WeatherDescription;
-  }>;
 }
 
-interface WeatherDescription {
-  description: string;
-  icon: string;
-}
+// Add helper function to get temperature stats for a specific day
+const getDailyTemperatureStats = (
+  gridData: GridDataForecast,
+  targetDate: Date
+): { maxTemp: number; minTemp: number } => {
+  const targetDateStr = targetDate.toDateString();
+  
+  // Filter temperature values for the target date
+  const dayTemps = gridData.properties.temperature.values.filter(item => {
+    const itemDate = new Date(item.validTime.split('/')[0]);
+    return itemDate.toDateString() === targetDateStr;
+  });
 
-const getDayName = (timestamp: number): string => {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  return days[new Date(timestamp * 1000).getDay()];
+  if (dayTemps.length === 0) {
+    return { maxTemp: 0, minTemp: 0 };
+  }
+
+  // Convert Celsius to Fahrenheit since grid data uses Celsius
+  const temps = dayTemps.map(t => (t.value * 9/5) + 32);
+  return {
+    maxTemp: Math.round(Math.max(...temps)),
+    minTemp: Math.round(Math.min(...temps))
+  };
 };
 
-export const fetchWeatherData = async (latitude: number, longitude: number): Promise<ProcessedWeatherData> => {
+export const fetchWeatherData = async (latitude: number, longitude: number) => {
   try {
-    const params = {
-      latitude,
-      longitude,
-      current: ["temperature_2m", "relative_humidity_2m", "precipitation", "rain", "weather_code", "wind_speed_10m"],
-      hourly: ["temperature_2m", "relative_humidity_2m", "rain", "weather_code"],
-      daily: ["weather_code", "temperature_2m_max", "temperature_2m_min", "rain_sum", "precipitation_probability_max", "wind_speed_10m_max"],
-      temperature_unit: "fahrenheit",
-      wind_speed_unit: "mph",
-      precipitation_unit: "inch",
-      timezone: "America/Los_Angeles",
-      forecast_days: 7
+    const headers = {
+      'User-Agent': '(Clydro Weather App, contact@clydro.com)',
+      'Accept': 'application/json'
     };
 
-    const url = "https://api.open-meteo.com/v1/forecast";
-    const responses = await fetchWeatherApi(url, params);
-    const response = responses[0];
+    // Get grid point data
+    const pointResponse = await fetch(
+      `https://api.weather.gov/points/${latitude},${longitude}`,
+      { headers }
+    );
+    
+    if (!pointResponse.ok) {
+      throw new Error('Failed to fetch weather point data');
+    }
 
-    const current = response.current()!;
-    const daily = response.daily()!;
+    const pointData: WeatherPoint = await pointResponse.json();
+    
+    // Fetch all three forecast types
+    const [forecastResponse, hourlyResponse, gridDataResponse] = await Promise.all([
+      fetch(pointData.properties.forecast, { headers }),
+      fetch(pointData.properties.forecastHourly, { headers }),
+      fetch(pointData.properties.forecastGridData, { headers })
+    ]);
+    
+    if (!forecastResponse.ok || !hourlyResponse.ok || !gridDataResponse.ok) {
+      throw new Error('Failed to fetch forecast data');
+    }
 
-    // Process current weather
-    const currentWeather = {
-      temperature: current.variables(0)!.value(),
-      humidity: current.variables(1)!.value(),
-      precipitation: current.variables(2)!.value(),
-      rain: current.variables(3)!.value(),
-      condition: getWeatherDescription(current.variables(4)!.value()),
-      windSpeed: current.variables(5)!.value()
-    };
+    const forecastData: WeatherForecast = await forecastResponse.json();
+    const hourlyData: WeatherForecast = await hourlyResponse.json();
+    const gridData: GridDataForecast = await gridDataResponse.json();
 
-    // Get daily time array and values
-    const dailyTimes = daily.time();
-    const weatherCodes = daily.variables(0)!.valuesArray()!;
-    const maxTemps = daily.variables(1)!.valuesArray()!;
-    const minTemps = daily.variables(2)!.valuesArray()!;
-    const rainSums = daily.variables(3)!.valuesArray()!;
-    const precipProbs = daily.variables(4)!.valuesArray()!;
-    const maxWindSpeeds = daily.variables(5)!.valuesArray()!;
+    // Get current conditions from hourly data
+    const currentHour = hourlyData.properties.periods[0];
+    
+    // Get current humidity from grid data
+    const currentTime = new Date();
+    const currentHumidity = gridData.properties.relativeHumidity.values.find(
+      item => {
+        const validTime = new Date(item.validTime.split('/')[0]);
+        return validTime <= currentTime;
+      }
+    )?.value || 0;
 
-    // Process daily forecast ensuring all 7 days
-    const dailyForecast = Array.from({ length: 7 }, (_, i) => ({
-      date: Number(dailyTimes[i]),
-      dayName: getDayName(Number(dailyTimes[i])),
-      maxTemp: maxTemps[i],
-      minTemp: minTemps[i],
-      rainSum: rainSums[i],
-      precipitationChance: precipProbs[i],
-      maxWindSpeed: maxWindSpeeds[i],
-      condition: getWeatherDescription(weatherCodes[i])
-    }));
+    // Process daily forecast data
+    const daily: DailyForecast[] = [];
+    const periods = forecastData.properties.periods;
+    const processedDays = new Set();
+    
+    for (let i = 0; i < periods.length; i++) {
+      const period = periods[i];
+      const periodDate = new Date(period.startTime);
+      const dayKey = periodDate.toDateString();
+      
+      if (!processedDays.has(dayKey)) {
+        // Get temperature stats from grid data
+        const tempStats = getDailyTemperatureStats(gridData, periodDate);
+        
+        // Find all periods for this day for other data
+        const dayPeriods = periods.filter(p => 
+          new Date(p.startTime).toDateString() === dayKey
+        );
+        
+        // Get precipitation chance from grid data
+        const precipData = gridData.properties.probabilityOfPrecipitation.values.find(
+          item => new Date(item.validTime.split('/')[0]).toDateString() === dayKey
+        );
+        
+        // Use the first period of the day for conditions and wind
+        const dayPeriod = dayPeriods[0];
+        
+        daily.push({
+          date: period.startTime,
+          dayName: format(periodDate, 'EEEE'),
+          maxTemp: tempStats.maxTemp,
+          minTemp: tempStats.minTemp,
+          maxWindSpeed: parseInt(dayPeriod.windSpeed.split(' ')[0]),
+          precipitationChance: precipData?.value || dayPeriod.probabilityOfPrecipitation?.value || 0,
+          condition: {
+            description: dayPeriod.shortForecast,
+            icon: mapNWSIconToLocal(dayPeriod.icon)
+          }
+        });
+        
+        processedDays.add(dayKey);
+      }
+    }
+
+    // Sort daily forecast by date
+    daily.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Get current conditions from grid data for more accuracy
+    const currentTemp = gridData.properties.temperature.values[0];
+    const currentTempF = currentTemp ? Math.round((currentTemp.value * 9/5) + 32) : currentHour.temperature;
 
     return {
-      current: currentWeather,
-      daily: dailyForecast
+      current: {
+        temperature: currentTempF,
+        humidity: Math.round(currentHumidity),
+        condition: {
+          description: currentHour.shortForecast,
+          icon: mapNWSIconToLocal(currentHour.icon)
+        },
+        precipitation: currentHour.probabilityOfPrecipitation?.value || 0,
+        windSpeed: parseInt(currentHour.windSpeed.split(' ')[0]),
+        windDirection: 0,
+      },
+      daily: daily.slice(0, 7)
     };
   } catch (error) {
     console.error('Error fetching weather data:', error);
-    throw error;
+    return null;
   }
 };
 
-export const getWeatherDescription = (code: number): WeatherDescription => {
-  const weatherCodes: Record<number, WeatherDescription> = {
-    0: { description: 'Clear sky', icon: 'sun' },
-    1: { description: 'Mainly clear', icon: 'sun' },
-    2: { description: 'Partly cloudy', icon: 'cloud-sun' },
-    3: { description: 'Overcast', icon: 'cloud' },
-    45: { description: 'Foggy', icon: 'smog' },
-    48: { description: 'Depositing rime fog', icon: 'smog' },
-    51: { description: 'Light drizzle', icon: 'cloud-rain' },
-    53: { description: 'Moderate drizzle', icon: 'cloud-rain' },
-    55: { description: 'Dense drizzle', icon: 'cloud-rain' },
-    61: { description: 'Slight rain', icon: 'cloud-rain' },
-    63: { description: 'Moderate rain', icon: 'cloud-rain' },
-    65: { description: 'Heavy rain', icon: 'cloud-showers-heavy' },
-    71: { description: 'Slight snow', icon: 'snowflake' },
-    73: { description: 'Moderate snow', icon: 'snowflake' },
-    75: { description: 'Heavy snow', icon: 'snowflake' },
-    77: { description: 'Snow grains', icon: 'snowflake' },
-    80: { description: 'Slight rain showers', icon: 'cloud-rain' },
-    81: { description: 'Moderate rain showers', icon: 'cloud-rain' },
-    82: { description: 'Violent rain showers', icon: 'cloud-showers-heavy' },
-    85: { description: 'Slight snow showers', icon: 'snowflake' },
-    86: { description: 'Heavy snow showers', icon: 'snowflake' },
-    95: { description: 'Thunderstorm', icon: 'bolt' },
-    96: { description: 'Thunderstorm with slight hail', icon: 'cloud-meatball' },
-    99: { description: 'Thunderstorm with heavy hail', icon: 'cloud-meatball' }
-  };
-  return weatherCodes[code] || { description: 'Unknown', icon: 'question' };
+const mapNWSIconToLocal = (nwsIcon: string): string => {
+  const iconUrl = nwsIcon.toLowerCase();
+  if (iconUrl.includes('/skc') || iconUrl.includes('/few')) return 'sun';
+  if (iconUrl.includes('/sct') || iconUrl.includes('/bkn')) return 'cloud-sun';
+  if (iconUrl.includes('/ovc')) return 'cloud';
+  if (iconUrl.includes('/rain') || iconUrl.includes('/tsra')) return 'cloud-rain';
+  if (iconUrl.includes('/tsra')) return 'bolt';
+  if (iconUrl.includes('/snow')) return 'snowflake';
+  if (iconUrl.includes('/fog')) return 'smog';
+  if (iconUrl.includes('/wind')) return 'wind';
+  return 'cloud-sun';
 };
 
-interface MoistureData {
-  currentMoisture: number;
-  history: Array<{
-    timestamp: number;
-    value: number;
-  }>;
-}
-
-export const fetchMoistureData = async (): Promise<MoistureData> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const baseValue = 45;
-      const history = Array.from({ length: 24 }, (_, i) => ({
-        timestamp: Date.now() - (23 - i) * 3600000,
-        value: baseValue + Math.sin(i / 4) * 15 + (Math.random() - 0.5) * 5
-      }));
-      
-      resolve({
-        currentMoisture: history[history.length - 1].value,
-        history: history
-      });
-    }, 1000);
-  });
+export const fetchMoistureData = async () => {
+  return {
+    currentMoisture: 45,
+    history: [
+      { timestamp: new Date().getTime() - 3600000, value: 48 },
+      { timestamp: new Date().getTime() - 7200000, value: 52 },
+      { timestamp: new Date().getTime() - 10800000, value: 55 }
+    ]
+  };
 };

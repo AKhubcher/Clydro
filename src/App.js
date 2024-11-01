@@ -32,102 +32,20 @@ const WeatherDetail = ({ icon: IconComponent, label, value, unit, trend }) => (
       <div className="weather-info">
         <div className="weather-label">{label}</div>
         <div className="weather-value">
-          {value}{unit}
+          {value !== undefined ? value : 'N/A'}{unit}
         </div>
       </div>
     </div>
   </div>
 );
 
-// First, remove the duplicate sampleForecast and keep only this one
-const sampleForecast = [
-  {
-    dayName: 'MONDAY',
-    maxTemp: 48,
-    minTemp: 41,
-    precipitationChance: 71,
-    maxWindSpeed: 17,
-    condition: {
-      icon: 'cloud-rain',
-      description: 'Light drizzle'
-    }
-  },
-  {
-    dayName: 'TUESDAY',
-    maxTemp: 50,
-    minTemp: 41,
-    precipitationChance: 54,
-    maxWindSpeed: 9,
-    condition: {
-      icon: 'cloud-rain',
-      description: 'Moderate rain'
-    }
-  },
-  {
-    dayName: 'WEDNESDAY',
-    maxTemp: 51,
-    minTemp: 42,
-    precipitationChance: 94,
-    maxWindSpeed: 12,
-    condition: {
-      icon: 'cloud-rain',
-      description: 'Slight rain'
-    }
-  },
-  {
-    dayName: 'THURSDAY',
-    maxTemp: 50,
-    minTemp: 41,
-    precipitationChance: 54,
-    maxWindSpeed: 9,
-    condition: {
-      icon: 'cloud-rain',
-      description: 'Moderate rain'
-    }
-  },
-  {
-    dayName: 'FRIDAY',
-    maxTemp: 50,
-    minTemp: 45,
-    precipitationChance: 88,
-    maxWindSpeed: 11,
-    condition: {
-      icon: 'cloud-rain',
-      description: 'Moderate rain'
-    }
-  },
-  {
-    dayName: 'SATURDAY',
-    maxTemp: 49,
-    minTemp: 46,
-    precipitationChance: 75,
-    maxWindSpeed: 6,
-    condition: {
-      icon: 'cloud-rain',
-      description: 'Slight rain showers'
-    }
-  },
-  {
-    dayName: 'SUNDAY',
-    maxTemp: 50,
-    minTemp: 43,
-    precipitationChance: 68,
-    maxWindSpeed: 4,
-    condition: {
-      icon: 'cloud-rain',
-      description: 'Light drizzle'
-    }
-  }
-];
-
 const WeeklyForecast = ({ forecast }) => {
   const currentDayName = format(new Date(), 'EEEE').toUpperCase();
-  const forecastToUse = forecast?.length > 0 ? forecast : sampleForecast;
   
   return (
     <div className="weekly-forecast">
-      {forecastToUse.map((day, index) => {
-        const isCurrentDay = day.dayName === currentDayName;
+      {forecast?.map((day, index) => {
+        const isCurrentDay = day.dayName.toUpperCase() === currentDayName;
         
         return (
           <div 
@@ -135,7 +53,7 @@ const WeeklyForecast = ({ forecast }) => {
             className={`forecast-day ${isCurrentDay ? 'current-day' : ''}`}
           >
             <div className="forecast-day-name">
-              {day.dayName}
+              {day.dayName.toUpperCase()}
             </div>
             <div className="forecast-icon-wrapper">
               {React.createElement(getWeatherIcon(day.condition.icon))}
@@ -164,11 +82,22 @@ const WeeklyForecast = ({ forecast }) => {
   );
 };
 
-// Update getCurrentDayStats to use the current day from forecast
 const getCurrentDayStats = (forecast) => {
+  if (!forecast || !Array.isArray(forecast) || forecast.length === 0) {
+    return {
+      maxTemp: 0,
+      minTemp: 0,
+      precipitationChance: 0,
+      maxWindSpeed: 0,
+      condition: {
+        description: 'No data',
+        icon: 'cloud'
+      }
+    };
+  }
+
   const currentDayName = format(new Date(), 'EEEE').toUpperCase();
-  const forecastToUse = forecast?.length > 0 ? forecast : sampleForecast;
-  return forecastToUse.find(day => day.dayName === currentDayName) || forecastToUse[0];
+  return forecast.find(day => day.dayName.toUpperCase() === currentDayName) || forecast[0];
 };
 
 const RuleEditor = ({ rule, updateRule, removeRule }) => (
@@ -590,43 +519,55 @@ const SprinklerDashboard = () => {
 
   // Simulate weather updates
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchData = async () => {
-      if (location) {
-        const weatherData = await fetchWeatherData(
-          location.latitude,
-          location.longitude
-        );
-        
-        if (weatherData) {
-          // Update current weather
-          setWeather({
-            temperature: weatherData.current.temperature,
-            humidity: weatherData.current.humidity,
-            conditions: weatherData.current.condition.description,
-            precipitation: weatherData.current.precipitation * 100,
-            windSpeed: weatherData.current.windSpeed,
-            windDirection: weatherData.current.windDirection,
-            uvIndex: weatherData.hourly?.[0]?.uvIndex || 0,
-            icon: weatherData.current.condition.icon
-          });
+      if (location && isMounted) {
+        try {
+          const weatherData = await fetchWeatherData(
+            location.latitude,
+            location.longitude
+          );
+          
+          if (weatherData && isMounted) {
+            // Update current weather
+            setWeather({
+              temperature: weatherData.current.temperature,
+              humidity: weatherData.current.humidity,
+              conditions: weatherData.current.condition.description,
+              precipitation: weatherData.current.precipitation,
+              windSpeed: weatherData.current.windSpeed,
+              windDirection: weatherData.current.windDirection,
+              uvIndex: 0,
+              icon: weatherData.current.condition.icon
+            });
 
-          // Don't update forecast - use our sample forecast instead
-          // setForecast(weatherData.daily || []);
-        }
+            // Update forecast only if we have valid data
+            if (weatherData.daily && Array.isArray(weatherData.daily) && weatherData.daily.length > 0) {
+              setForecast(weatherData.daily);
+            }
+          }
 
-        const moistureData = await fetchMoistureData();
-        if (moistureData) {
-          setSoilMoisture(moistureData.currentMoisture);
-          setMoistureHistory(moistureData.history || []);
+          const moistureData = await fetchMoistureData();
+          if (moistureData && isMounted) {
+            setSoilMoisture(moistureData.currentMoisture);
+            setMoistureHistory(moistureData.history || []);
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
         }
       }
     };
 
-    if (location) {
-      fetchData();
-      const interval = setInterval(fetchData, 300000); // Update every 5 minutes
-      return () => clearInterval(interval);
-    }
+    fetchData();
+    
+    // Fetch every 15 minutes instead of 5
+    const interval = setInterval(fetchData, 900000);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, [location]);
 
   // Enhanced automation logic
@@ -737,12 +678,6 @@ const SprinklerDashboard = () => {
 
   // Get current day stats for the weather overview section
   const currentDayStats = getCurrentDayStats(forecast);
-
-  // Add this after the location useEffect
-  useEffect(() => {
-    // Set the initial forecast to our sample data
-    setForecast(sampleForecast);
-  }, []); // Empty dependency array means this runs once on mount
 
   return (
     <div className={`dashboard ${isDarkMode ? 'dark-mode' : ''}`}>

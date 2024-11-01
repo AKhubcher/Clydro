@@ -15,6 +15,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "express": "^4.21.1",
     "lucide-react": "^0.453.0",
     "openmeteo": "^1.1.4",
     "react": "^18.3.1",
