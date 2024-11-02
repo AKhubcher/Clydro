@@ -1,0 +1,111 @@
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2.5rem;
+  background: var(--surface-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: -0.5px;
+}
+
+.header-controls {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.profile-button,
+.theme-toggle,
+.logout-button {
+  padding: 0.75rem;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.5rem;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  background: #e74c3c;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-text {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+.logout-button svg {
+  color: #ffffff;
+  font-size: 1.2rem;
+}
+
+.logout-button:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.profile-button:hover,
+.theme-toggle:hover {
+  background: var(--hover-color);
+  transform: scale(1.05);
+}
+
+/* Update theme toggle styles */
+.theme-toggle {
+  padding: 0.75rem;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.5rem;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.sun-icon {
+  color: #f1c40f;
+  filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.4));
+}
+
+.moon-icon {
+  color: #f1c40f;
+  filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.4));
+}
+
+/* Dark mode adjustments */
+.dark-mode .logout-button {
+  background: #c0392b;
+}
+
+.dark-mode .logout-button:hover {
+  background: #e74c3c;
+}
+
+.dark-mode .logout-text {
+  color: #ffffff;
+} 

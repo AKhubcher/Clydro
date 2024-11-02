@@ -2,5 +2,28 @@
 @import './weather.css';
 @import './moisture.css';
 @import './scheduling.css';
+@import './automation.css';
+@import './modal.css';
 @import './darkMode.css';
-@import './systemStatus.css'; 
+@import './systemStatus.css';
+@import './header.css';
+@import './profile.css';
+@import './validation.css';
+
+/* Add these styles */
+.signout-button {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.signout-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+} 

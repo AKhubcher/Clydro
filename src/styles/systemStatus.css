@@ -62,24 +62,24 @@
 }
 
 .status-badge {
-  padding: 8px 16px;
+  padding: 0.5rem 1rem;
   border-radius: 20px;
-  font-size: 0.9em;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 500;
+  text-align: center;
+  width: fit-content;
+  transition: all 0.3s ease;
 }
 
 .status-badge[data-status="active"] {
-  background: rgba(46, 204, 113, 0.2);
-  color: #27ae60;
-  border: 1px solid rgba(46, 204, 113, 0.4);
+  background: rgba(46, 213, 115, 0.2);
+  color: #2ecc71;
+  border: 2px solid #2ecc71;
 }
 
 .status-badge[data-status="inactive"] {
   background: rgba(231, 76, 60, 0.2);
   color: #e74c3c;
-  border: 1px solid rgba(231, 76, 60, 0.4);
+  border: 2px solid #e74c3c;
 }
 
 .mode-badge {
@@ -208,4 +208,13 @@
 .dark-mode .system-controls-container {
     background: #313d4e;
     border: 1px solid #1C2834;
+}
+
+/* Update the switch colors for on/off toggle */
+.switch input:checked + .slider {
+  background-color: #2ecc71;
+}
+
+.switch input:not(:checked) + .slider {
+  background-color: #e74c3c;
 } 

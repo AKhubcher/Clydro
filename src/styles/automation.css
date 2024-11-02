@@ -65,67 +65,65 @@
 
 .rules-grid {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 15px;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
 }
 
 .rule-item {
+    display: inline-flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    width: auto;
+    max-width: fit-content;
+    min-width: auto;
+    flex: 0 0 auto;
+}
+
+.rule-details {
     display: flex;
     flex-direction: column;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 16px;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(52, 152, 219, 0.2);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.rule-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 12px;
-    border-bottom: 2px solid;
-    margin-bottom: 12px;
-}
-
-.rule-title {
-    font-weight: 600;
-    color: #2c3e50;
-    font-size: 1.1em;
+    gap: 0.5rem;
+    align-items: flex-start;
+    width: auto;
 }
 
 .rule-condition {
-    font-size: 0.95em;
-    color: #7f8c8d;
-    padding: 8px 12px;
-    background: rgba(0, 0, 0, 0.03);
-    border-radius: 8px;
-    margin: 8px 0;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.rule-condition {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .rule-action {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 0.9em;
-    font-weight: 500;
-    margin-top: 8px;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    width: auto;
+    align-self: flex-start;
+    white-space: nowrap;
 }
 
-.rule-action[data-action="water"] {
-    background: rgba(52, 152, 219, 0.1);
-    color: #3498db;
-    border: 1px solid rgba(52, 152, 219, 0.2);
+.rule-action[data-action="start"] {
+    background: rgba(46, 213, 115, 0.1);
+    color: #2ecc71;
+    border: 1px solid #2ecc71;
 }
 
 .rule-action[data-action="stop"] {
     background: rgba(231, 76, 60, 0.1);
     color: #e74c3c;
-    border: 1px solid rgba(231, 76, 60, 0.2);
+    border: 1px solid #e74c3c;
 }
 
 .rule-item:hover {
@@ -199,4 +197,16 @@
 
 .rule-item[data-type="weather"] .rule-header {
     border-bottom-color: #27ae60;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .rules-grid {
+        flex-direction: column;
+    }
+    
+    .rule-item {
+        width: fit-content;
+        max-width: 100%;
+    }
 }

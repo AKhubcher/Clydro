@@ -1,31 +1,24 @@
 {
   "name": "clydro",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@radix-ui/react-dialog": "^1.1.2",
-    "@radix-ui/react-select": "^2.1.2",
-    "@radix-ui/react-slider": "^1.2.1",
-    "@radix-ui/react-switch": "^1.1.1",
-    "@radix-ui/react-tabs": "^1.1.1",
-    "@testing-library/jest-dom": "^6.6.2",
-    "@testing-library/react": "^16.0.1",
-    "@testing-library/user-event": "^14.5.2",
-    "chart.js": "^4.4.6",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
-    "express": "^4.21.1",
-    "lucide-react": "^0.453.0",
-    "openmeteo": "^1.1.4",
-    "react": "^18.3.1",
-    "react-chartjs-2": "^5.2.0",
-    "react-dom": "^18.3.1",
-    "react-icons": "^5.3.0",
-    "react-scripts": "^5.0.1",
-    "recharts": "^2.13.0",
-    "tailwind-merge": "^2.5.4",
-    "web-vitals": "^4.2.4"
+    "@testing-library/react": "^13.4.0",
+    "@types/node": "^16.18.68",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "axios": "^1.6.2",
+    "date-fns": "^2.30.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.12.0",
+    "react-router-dom": "^6.21.0",
+    "react-scripts": "5.0.1",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -35,8 +28,7 @@
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "react-app"
     ]
   },
   "browserslist": {
@@ -50,9 +42,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@shadcn/ui": "^0.0.4"
   }
 }
