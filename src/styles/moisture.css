@@ -67,10 +67,7 @@
 }
 
 .moisture-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 20px;
+  display: none;
 }
 
 .stat-item {
@@ -259,7 +256,7 @@
 .dark-mode .moisture-value,
 .dark-mode .stat-item,
 .dark-mode .moisture-bar-container {
-  background: rgba(0, 0, 0, 0.2);
+  background: #1d2a31;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -277,20 +274,35 @@
 
 /* Update dark mode styles */
 .dark-mode .soil-moisture {
-  background: #313d4e;
+  background: #313d4e;  /* Lighter dark background for outer container */
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.moisture-value strong {
-  font-size: 1.4em;
-  color: #3498db;
-  margin: 0 8px;
+.dark-mode .moisture-value-container,
+.dark-mode .moisture-stats-container {
+  background: #1d2a31;  /* Darker background for container */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Make progress bar background lighter */
+.dark-mode .moisture-bar-container {
+  background: rgba(236, 240, 241, 0.1);  /* Light grey background */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Keep text colors as is */
+.dark-mode .moisture-value {
+  color: #ecf0f1;
+}
+
+.dark-mode .moisture-labels {
+  color: #bdc3c7;
 }
 
 /* Group moisture bar with current level */
 .moisture-value-container {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #ffffff;
+  border: 1px solid rgba(52, 152, 219, 0.2);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -339,4 +351,30 @@
 .dark-mode .moisture-bar-container {
     background: #313d4e;
     border: 1px solid #1C2834;
+}
+
+/* Update dark mode styles for inner containers while keeping outer container lighter */
+.dark-mode .soil-moisture {
+  background: #313d4e;  /* Lighter dark background for outer container */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .moisture-value,
+.dark-mode .moisture-bar-container {
+  background: #1d2a31;  /* Darker background for inner containers */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .moisture-stats-container {
+  background: #313d4e;  /* Keep outer container lighter */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Keep text colors as is */
+.dark-mode .moisture-value {
+  color: #ecf0f1;
+}
+
+.dark-mode .moisture-labels {
+  color: #bdc3c7;
 }

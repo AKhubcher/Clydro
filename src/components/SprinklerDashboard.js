@@ -2,23 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { 
   FaCloud, FaTint, FaSun, FaWind, 
   FaThermometerHalf, FaUmbrella, 
-  FaBolt, FaSnowflake, FaSmog, FaCloudSun,
-  FaCog
+  FaBolt, FaSnowflake, FaSmog, FaCloudSun
 } from 'react-icons/fa';
 import { format } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
-import { fetchWeatherData, fetchMoistureData } from '../services/weatherService.ts';
+import { fetchWeatherData} from '../services/weatherService.ts';
 import '../styles/index.css';
+import axios from 'axios';
 
-// Import all the components we created earlier
-import AutomationRules from './Automation/AutomationRules';
-import ScheduleEditor from './Scheduling/ScheduleEditor';
+// Import components
 import SoilMoistureSection from './Moisture/SoilMoistureSection';
-import SchedulingAndRules from './Scheduling/SchedulingAndRules';
 import WeatherDetail from './Weather/WeatherDetail';
 import WeeklyForecast from './Weather/WeeklyForecast';
 import Header from './Header/Header';
 import ProfileMenu from './Profile/ProfileMenu';
+import WaterAnalyzer from './WaterAnalyzer';
 
 const getWeatherIcon = (iconName) => {
   const icons = {
@@ -52,38 +50,7 @@ const SprinklerDashboard = () => {
   const [soilMoisture, setSoilMoisture] = useState(45);
   const [isAutoMode, setIsAutoMode] = useState(true);
   const [isSprinklerOn, setIsSprinklerOn] = useState(false);
-  const [automationRules, setAutomationRules] = useState([
-    {
-      condition: 'moisture',
-      operator: 'below',
-      value: 30,
-      action: 'start',
-      duration: 30
-    },
-    {
-      condition: 'rain',
-      operator: 'above',
-      value: 40,
-      action: 'stop'
-    }
-  ]);
-  
-  const [schedule, setSchedule] = useState([
-    {
-      day: 'Monday',
-      time: '06:00',
-      duration: 30,
-      adjustForWeather: true
-    }
-  ]);
-
-  const [isConfigureOpen, setIsConfigureOpen] = useState(false);
-  const [configureTab, setConfigureTab] = useState('schedule');
-  const [tempSchedule, setTempSchedule] = useState([]);
-  const [tempRules, setTempRules] = useState([]);
-  const [isAutoDeciding, setIsAutoDeciding] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [moistureHistory, setMoistureHistory] = useState([]);
   const [forecast, setForecast] = useState([]);
   const [location, setLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
@@ -172,10 +139,12 @@ const SprinklerDashboard = () => {
             }
           }
 
-          const moistureData = await fetchMoistureData();
-          if (moistureData && isMounted) {
-            setSoilMoisture(moistureData.currentMoisture);
-            setMoistureHistory(moistureData.history || []);
+          const response = await axios.get('https://api.thingspeak.com/channels/2794876/fields/1.json?results=1000');
+          const feeds = response.data.feeds;
+          if (feeds && feeds.length > 0 && isMounted) {
+            const currentValue = parseFloat(feeds[feeds.length - 1].field1);
+            const moisturePercentage = 100 - (currentValue / 3800 * 100);
+            setSoilMoisture(Math.round(moisturePercentage));
           }
         } catch (error) {
           console.error('Error fetching data:', error);
@@ -194,103 +163,6 @@ const SprinklerDashboard = () => {
     }
   }, [location]);
 
-  // Automation Effect
-  useEffect(() => {
-    if (isAutoMode) {
-      const shouldActivate = automationRules.some(rule => {
-        const value = {
-          moisture: soilMoisture,
-          temperature: weather.temperature,
-          rain: weather.precipitation,
-          wind: weather.windSpeed,
-          uv: weather.uvIndex
-        }[rule.condition];
-
-        const meetsCondition = rule.operator === 'below' ? 
-          value < rule.value : 
-          value > rule.value;
-
-        return meetsCondition && rule.action === 'start';
-      });
-
-      const shouldDeactivate = automationRules.some(rule => {
-        const value = {
-          moisture: soilMoisture,
-          temperature: weather.temperature,
-          rain: weather.precipitation,
-          wind: weather.windSpeed,
-          uv: weather.uvIndex
-        }[rule.condition];
-
-        const meetsCondition = rule.operator === 'below' ? 
-          value < rule.value : 
-          value > rule.value;
-
-        return meetsCondition && rule.action === 'stop';
-      });
-
-      setIsSprinklerOn(shouldActivate && !shouldDeactivate);
-    }
-  }, [soilMoisture, weather, automationRules, isAutoMode]);
-
-  // Handlers
-  const handleSaveChanges = () => {
-    if (configureTab === 'schedule') {
-      setSchedule(tempSchedule);
-    } else {
-      setAutomationRules(tempRules);
-    }
-    setIsConfigureOpen(false);
-  };
-
-  const handleCancelChanges = () => {
-    setIsConfigureOpen(false);
-  };
-
-  const handleAutoModeDecide = () => {
-    setIsAutoDeciding(true);
-    setTimeout(() => {
-      const autoSchedule = [
-        {
-          day: 'Monday',
-          time: '06:00',
-          duration: 25,
-          adjustForWeather: true,
-          minMoisture: 35,
-          rainThreshold: 30
-        },
-        {
-          day: 'Thursday',
-          time: '07:00',
-          duration: 30,
-          adjustForWeather: true,
-          minMoisture: 35,
-          rainThreshold: 30
-        }
-      ];
-      const autoRules = [
-        {
-          condition: 'moisture',
-          operator: 'below',
-          value: 30,
-          action: 'start',
-          duration: 20
-        },
-        {
-          condition: 'rain',
-          operator: 'above',
-          value: 50,
-          action: 'stop'
-        }
-      ];
-      setSchedule(autoSchedule);
-      setAutomationRules(autoRules);
-      setIsAutoMode(true);
-      setIsAutoDeciding(false);
-      setIsConfigureOpen(false);
-    }, 3000);
-  };
-
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
     document.body.classList.toggle('dark-mode');
@@ -298,7 +170,6 @@ const SprinklerDashboard = () => {
 
   const handleProfileNavigate = (section) => {
     setIsProfileMenuOpen(false);
-    // Handle navigation to different profile sections
     console.log(`Navigating to ${section}`);
   };
 
@@ -359,118 +230,22 @@ const SprinklerDashboard = () => {
       <div className="dashboard-grid">
         <SoilMoistureSection 
           soilMoisture={soilMoisture}
-          moistureHistory={moistureHistory}
           isDarkMode={isDarkMode}
         />
         
-        <section className="system-status">
-          <h2><FaCog /> System Status & Control</h2>
-          <div className="system-controls-container">
-            <div className="power-control">
-              <span>System Power</span>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={isSprinklerOn}
-                  onChange={(e) => !isAutoMode && setIsSprinklerOn(e.target.checked)}
-                  disabled={isAutoMode}
-                />
-                <span className="slider round"></span>
-              </label>
-            </div>
-            <div className="status-main">
-              <span>Current Status</span>
-              <div className="status-badge" data-status={isSprinklerOn ? 'active' : 'inactive'}>
-                {isSprinklerOn ? 'Active' : 'Inactive'}
-              </div>
-            </div>
-            <div className="status-info">
-              <span>Operation Mode</span>
-              <div className="mode-badge">
-                {isAutoMode ? 'Automatic' : 'Manual'} Control
-              </div>
-            </div>
-            <div className="next-schedule">
-              <span>Next Scheduled</span>
-              <span className="next-schedule-time">
-                {schedule[0] ? 
-                  `${schedule[0].day} at ${new Date(`2000-01-01 ${schedule[0].time}`).toLocaleTimeString([], {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: true
-                  })}` : 
-                  'No schedule'
-                }
-              </span>
-            </div>
-          </div>
-        </section>
+        <WaterAnalyzer 
+          weather={weather}
+          soilMoisture={soilMoisture}
+          isSprinklerOn={isSprinklerOn}
+          setIsSprinklerOn={setIsSprinklerOn}
+          isAutoMode={isAutoMode}
+          currentDayStats={currentDayStats}
+        />
       </div>
 
-      <SchedulingAndRules 
-        automationRules={automationRules}
-        schedule={schedule}
-        isAutoMode={isAutoMode}
-        setIsConfigureOpen={setIsConfigureOpen}
-        setConfigureTab={setConfigureTab}
-      />
-
-      {isSprinklerOn && schedule.length > 0 && (
+      {isSprinklerOn && (
         <div className="status-alert">
-          Sprinkler system is currently active. Next scheduled watering: {schedule[0].day} at {schedule[0].time}
-        </div>
-      )}
-
-      {isConfigureOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Configure {configureTab === 'schedule' ? 'Schedule' : 'Rules'}</h2>
-              <div className="tab-buttons">
-                <button 
-                  className={`modal-button ${configureTab === 'schedule' ? 'active' : ''}`}
-                  onClick={() => setConfigureTab('schedule')}
-                >
-                  Schedule
-                </button>
-                <button 
-                  className={`modal-button ${configureTab === 'rules' ? 'active' : ''}`}
-                  onClick={() => setConfigureTab('rules')}
-                >
-                  Rules
-                </button>
-              </div>
-            </div>
-            
-            <div className="modal-body">
-              {isAutoDeciding ? (
-                <div className="auto-deciding">
-                  <div className="loader"></div>
-                  <p>Auto Mode is analyzing optimal settings...</p>
-                </div>
-              ) : (
-                <>
-                  {configureTab === 'schedule' ? (
-                    <ScheduleEditor schedule={tempSchedule} setSchedule={setTempSchedule} />
-                  ) : (
-                    <AutomationRules rules={tempRules} setRules={setTempRules} />
-                  )}
-                </>
-              )}
-            </div>
-
-            <div className="modal-footer">
-              <button onClick={handleAutoModeDecide} className="modal-button auto-decide-button">
-                Let Auto Mode Decide
-              </button>
-              <button onClick={handleCancelChanges} className="modal-button cancel-button">
-                Cancel
-              </button>
-              <button onClick={handleSaveChanges} className="modal-button save-button">
-                Save Changes
-              </button>
-            </div>
-          </div>
+          Sprinkler system is currently active
         </div>
       )}
 

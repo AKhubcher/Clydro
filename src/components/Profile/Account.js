@@ -13,6 +13,27 @@ import {
 } from '../../utils/validation';
 import '../../styles/account.css';
 
+// Add this somewhere before the Account component or in your initialization code
+const mockUser = {
+  email: "test@example.com",
+  password: "Test123!", // In a real app, this should be hashed
+  name: "Test User",
+  phone: "123-456-7890",
+  address: {
+    street: "123 Test St",
+    city: "Test City",
+    state: "TS",
+    zipCode: "12345",
+    country: "Test Country"
+  }
+};
+
+// Set up mock data in localStorage
+localStorage.setItem('currentUser', JSON.stringify(mockUser));
+localStorage.setItem('registeredUsers', JSON.stringify({
+  'test@example.com': mockUser
+}));
+
 const Account = () => {
   const navigate = useNavigate();
   const { updateProfile } = useAuth();
